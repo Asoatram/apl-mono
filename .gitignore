@@ -14,3 +14,7 @@ dist/
 # IDE files
 .vscode/
 .idea/
+
+# Secrets
+ca.pem
+.env
