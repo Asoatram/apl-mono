@@ -8,3 +8,7 @@ class PantryService:
     @staticmethod
     async def get_pantry_by_userid(db, userid):
         return await PantryRepository.get_pantry_by_userid(db, userid)
+    
+    @staticmethod
+    async def add_ingredient_to_pantry(db, pantryid, ingredientsid, quantity):
+        return await PantryRepository.add_ingredient_to_pantry(db, pantryid, ingredientsid, quantity)

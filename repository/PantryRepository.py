@@ -1,4 +1,5 @@
-from models.Pantry import Pantry
+from models.Pantry import Pantry, PantryIngredients
+from models.Ingredients import Ingredients
 from sqlalchemy import select
 
 class PantryRepository:
@@ -14,3 +15,21 @@ class PantryRepository:
     async def get_pantry_by_userid(db, userid):
         result = await db.execute(select(Pantry).where(Pantry.userid == userid))
         return result.scalars().all()
+    
+    @staticmethod
+    async def add_ingredient_to_pantry(db, pantryid, ingredientsid, quantity):
+        
+        result = await db.execute(select(Ingredients).where(Ingredients.ingredientsid == ingredientsid))
+        ingredient = result.scalar_one_or_none()
+        if not ingredient:
+            return None
+
+        pantry_ingredient = PantryIngredients(
+            pantryid=pantryid,
+            ingredientsid=ingredientsid,
+            quantity=quantity
+        )
+        db.add(pantry_ingredient)
+        await db.commit()
+        await db.refresh(pantry_ingredient)
+        return pantry_ingredient
