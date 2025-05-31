@@ -83,3 +83,37 @@ async def add_user_dietary_restriction(
             "dietaryrestrictionid": user_dietary.dietaryrestrictionid
         }
     }
+    
+@router.delete("/remove-from-user")
+async def remove_user_dietary_restriction(
+    payload: UserDietaryRestrictionRequest,
+    db: AsyncSession = Depends(get_db),
+    request: Request = None
+):
+    user = getattr(request.state, "user", None)
+    if not user or "sub" not in user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    userid = int(user["sub"])
+
+    # Cari relasi user-dietaryrestriction
+    result = await db.execute(
+        select(UserDietaryRestriction).where(
+            UserDietaryRestriction.userid == userid,
+            UserDietaryRestriction.dietaryrestrictionid == payload.dietaryrestrictionid
+        )
+    )
+    user_dietary = result.scalar_one_or_none()
+    if not user_dietary:
+        raise HTTPException(status_code=404, detail="User dietary restriction not found")
+
+    await db.delete(user_dietary)
+    await db.commit()
+    return {
+        "status": "success",
+        "message": "Dietary restriction removed from user.",
+        "data": {
+            "userdietaryrestrictionid": user_dietary.userdietaryrestrictionid,
+            "userid": user_dietary.userid,
+            "dietaryrestrictionid": user_dietary.dietaryrestrictionid
+        }
+    }
