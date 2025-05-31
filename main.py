@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controller import AuthController, RecipeController, IngredientController, PantryController
+from controller import AuthController, RecipeController, IngredientController, PantryController, DietaryRestrictionController
 from core.db import Base, engine
 from contextlib import asynccontextmanager
 
@@ -29,3 +29,5 @@ app.include_router(RecipeController.router, prefix="/api/v1", tags=["Recipes"], 
 app.include_router(PantryController.router, prefix="/api/v1", tags=["Pantry"])
 
 app.include_router(IngredientController.router, prefix="/api/v1", tags=["Ingredients"])
+
+app.include_router(DietaryRestrictionController.router, prefix="/api/v1", tags=["DietaryRestriction"])
