@@ -35,8 +35,13 @@ class PantryRepository:
         return pantry_ingredient
     
     @staticmethod
-    async def update_pantry_ingredient(db, pantryingredientsid, quantity):
-        result = await db.execute(select(PantryIngredients).where(PantryIngredients.pantryingredientsid == pantryingredientsid))
+    async def update_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid, quantity):
+        result = await db.execute(
+            select(PantryIngredients).where(
+                PantryIngredients.pantryid == pantryid,
+                PantryIngredients.ingredientsid == ingredientid
+            )
+        )
         pantry_ingredient = result.scalar_one_or_none()
         if not pantry_ingredient:
             return None

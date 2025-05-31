@@ -14,5 +14,5 @@ class PantryService:
         return await PantryRepository.add_ingredient_to_pantry(db, pantryid, ingredientsid, quantity)
     
     @staticmethod
-    async def update_pantry_ingredient(db, pantryingredientsid, quantity):
-        return await PantryRepository.update_pantry_ingredient(db, pantryingredientsid, quantity)
+    async def update_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid, quantity):
+        return await PantryRepository.update_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid, quantity)

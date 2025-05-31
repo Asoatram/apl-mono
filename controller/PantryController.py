@@ -15,8 +15,8 @@ class AddIngredientRequest(BaseModel):
     ingredientsid: int
     quantity: int
     
-class UpdateIngredientRequest(BaseModel):
-    pantryingredientsid: int
+class UpdateIngredientByIngredientIdRequest(BaseModel):
+    ingredientsid: int
     quantity: int
 
 @router.post("")
@@ -51,7 +51,6 @@ async def add_ingredient(
         raise HTTPException(status_code=401, detail="Unauthorized")
     userid = int(user["sub"])
 
-    # Ambil pantry milik user (asumsi satu pantry per user)
     pantries = await PantryService.get_pantry_by_userid(db, userid)
     if not pantries:
         raise HTTPException(status_code=404, detail="Pantry not found")
@@ -75,17 +74,23 @@ async def add_ingredient(
     }
     
 @router.put("/update-ingredient")
-async def update_ingredient(
-    payload: UpdateIngredientRequest,
+async def update_ingredient_by_ingredientid(
+    payload: UpdateIngredientByIngredientIdRequest,
     request: Request,
     db: AsyncSession = Depends(get_db)
 ):
     user = getattr(request.state, "user", None)
     if not user or "sub" not in user:
         raise HTTPException(status_code=401, detail="Unauthorized")
+    userid = int(user["sub"])
 
-    pantry_ingredient = await PantryService.update_pantry_ingredient(
-        db, payload.pantryingredientsid, payload.quantity
+    pantries = await PantryService.get_pantry_by_userid(db, userid)
+    if not pantries:
+        raise HTTPException(status_code=404, detail="Pantry not found")
+    pantryid = pantries[0].pantryid
+
+    pantry_ingredient = await PantryService.update_pantry_ingredient_by_ingredientid(
+        db, pantryid, payload.ingredientsid, payload.quantity
     )
     if not pantry_ingredient:
         raise HTTPException(status_code=404, detail="Pantry ingredient not found")
