@@ -49,3 +49,19 @@ class PantryRepository:
         await db.commit()
         await db.refresh(pantry_ingredient)
         return pantry_ingredient
+    
+    @staticmethod
+    async def delete_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid):
+        from models.Pantry import PantryIngredients
+        result = await db.execute(
+            select(PantryIngredients).where(
+                PantryIngredients.pantryid == pantryid,
+                PantryIngredients.ingredientsid == ingredientid
+            )
+        )
+        pantry_ingredient = result.scalar_one_or_none()
+        if not pantry_ingredient:
+            return None
+        await db.delete(pantry_ingredient)
+        await db.commit()
+        return pantry_ingredient

@@ -18,6 +18,9 @@ class AddIngredientRequest(BaseModel):
 class UpdateIngredientByIngredientIdRequest(BaseModel):
     ingredientsid: int
     quantity: int
+    
+class DeleteIngredientByIngredientIdRequest(BaseModel):
+    ingredientsid: int
 
 @router.post("")
 async def create_pantry(request: Request, db: AsyncSession = Depends(get_db)):
@@ -103,5 +106,39 @@ async def update_ingredient_by_ingredientid(
             "pantryid": pantry_ingredient.pantryid,
             "ingredientid": pantry_ingredient.ingredientsid,
             "quantity": pantry_ingredient.quantity
+        }
+    }
+    
+@router.delete("/delete-ingredient")
+async def delete_ingredient_by_ingredientid(
+    payload: DeleteIngredientByIngredientIdRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    user = getattr(request.state, "user", None)
+    if not user or "sub" not in user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    userid = int(user["sub"])
+
+    # Ambil pantry milik user (asumsi satu pantry per user)
+    pantries = await PantryService.get_pantry_by_userid(db, userid)
+    if not pantries:
+        raise HTTPException(status_code=404, detail="Pantry not found")
+    pantryid = pantries[0].pantryid
+
+    deleted = await PantryService.delete_pantry_ingredient_by_ingredientid(
+        db, pantryid, payload.ingredientsid
+    )
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Pantry ingredient not found")
+
+    return {
+        "status": "success",
+        "message": "Ingredient successfully deleted.",
+        "data": {
+            "pantryingredientsid": deleted.pantryingredientsid,
+            "pantryid": deleted.pantryid,
+            "ingredientid": deleted.ingredientsid,
+            "quantity": deleted.quantity
         }
     }

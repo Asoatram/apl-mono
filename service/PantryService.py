@@ -16,3 +16,7 @@ class PantryService:
     @staticmethod
     async def update_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid, quantity):
         return await PantryRepository.update_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid, quantity)
+    
+    @staticmethod
+    async def delete_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid):
+        return await PantryRepository.delete_pantry_ingredient_by_ingredientid(db, pantryid, ingredientid)
