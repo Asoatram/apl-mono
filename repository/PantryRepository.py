@@ -33,3 +33,14 @@ class PantryRepository:
         await db.commit()
         await db.refresh(pantry_ingredient)
         return pantry_ingredient
+    
+    @staticmethod
+    async def update_pantry_ingredient(db, pantryingredientsid, quantity):
+        result = await db.execute(select(PantryIngredients).where(PantryIngredients.pantryingredientsid == pantryingredientsid))
+        pantry_ingredient = result.scalar_one_or_none()
+        if not pantry_ingredient:
+            return None
+        pantry_ingredient.quantity = quantity
+        await db.commit()
+        await db.refresh(pantry_ingredient)
+        return pantry_ingredient

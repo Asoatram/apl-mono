@@ -14,6 +14,10 @@ router = APIRouter(
 class AddIngredientRequest(BaseModel):
     ingredientsid: int
     quantity: int
+    
+class UpdateIngredientRequest(BaseModel):
+    pantryingredientsid: int
+    quantity: int
 
 @router.post("")
 async def create_pantry(request: Request, db: AsyncSession = Depends(get_db)):
@@ -62,6 +66,33 @@ async def add_ingredient(
     return {
         "status": "success",
         "message": "Ingredient successfully added.",
+        "data": {
+            "pantryingredientsid": pantry_ingredient.pantryingredientsid,
+            "pantryid": pantry_ingredient.pantryid,
+            "ingredientid": pantry_ingredient.ingredientsid,
+            "quantity": pantry_ingredient.quantity
+        }
+    }
+    
+@router.put("/update-ingredient")
+async def update_ingredient(
+    payload: UpdateIngredientRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    user = getattr(request.state, "user", None)
+    if not user or "sub" not in user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    pantry_ingredient = await PantryService.update_pantry_ingredient(
+        db, payload.pantryingredientsid, payload.quantity
+    )
+    if not pantry_ingredient:
+        raise HTTPException(status_code=404, detail="Pantry ingredient not found")
+
+    return {
+        "status": "success",
+        "message": "Ingredient successfully updated.",
         "data": {
             "pantryingredientsid": pantry_ingredient.pantryingredientsid,
             "pantryid": pantry_ingredient.pantryid,
