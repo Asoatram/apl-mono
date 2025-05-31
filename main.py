@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controller import AuthController, RecipeController
+from controller import AuthController, RecipeController, IngredientController
 from core.db import Base, engine
 from contextlib import asynccontextmanager
 
@@ -25,3 +25,5 @@ app.add_middleware(
 app.include_router(AuthController.router, prefix="/auth", tags=["Authentication"])
 
 app.include_router(RecipeController.router, prefix="/api/v1", tags=["Recipes"], )
+
+app.include_router(IngredientController.router, prefix="/api/v1", tags=["Ingredients"])
