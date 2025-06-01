@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
@@ -64,3 +64,11 @@ async def ask_tips(message:RecipeTips):
     response = await RecipeService.ask_for_tips(message.message)
     return response
 
+@router.post("/recipes/idea")
+async def ask_idea(request:Request, db: AsyncSession = Depends(get_db)):
+    user = request.state.user if hasattr(request.state, "user") else None
+    if not user or "sub" not in user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    userid = int(user["sub"])
+    response = await RecipeService.ask_for_recipe(user_id=userid, db=db)
+    return response

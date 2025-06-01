@@ -1,3 +1,7 @@
+import uuid
+
+from sqlalchemy.orm import selectinload
+
 from models.Pantry import Pantry, PantryIngredients
 from models.Ingredients import Ingredients
 from sqlalchemy import select
@@ -10,11 +14,6 @@ class PantryRepository:
         await db.commit()
         await db.refresh(pantry)
         return pantry
-
-    @staticmethod
-    async def get_pantry_by_userid(db, userid):
-        result = await db.execute(select(Pantry).where(Pantry.userid == userid))
-        return result.scalars().all()
     
     @staticmethod
     async def add_ingredient_to_pantry(db, pantryid, ingredientsid, quantity):
@@ -65,3 +64,24 @@ class PantryRepository:
         await db.delete(pantry_ingredient)
         await db.commit()
         return pantry_ingredient
+
+    @staticmethod
+    async def get_pantry_ingredients_by_userid(db, userid):
+        result = await db.execute(
+            select(Pantry)
+            .options(selectinload(Pantry.pantry_ingredients).selectinload(PantryIngredients.ingredient))
+            .where(Pantry.userid == userid)
+        )
+
+
+        pantry = result.scalars().first()
+        return pantry
+    @staticmethod
+    async def get_pantry_by_userid(db, userid):
+        result = await db.execute(
+            select(Pantry).where(Pantry.userid == userid)
+        )
+
+        pantry = result.scalars().all()
+        print(pantry)
+        return pantry

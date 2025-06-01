@@ -5,6 +5,8 @@ from sqlalchemy.orm import selectinload
 from core.db import get_db
 from middleware.AuthGuard import JWTBearer
 from pydantic import BaseModel
+
+from repository.PantryRepository import PantryRepository
 from service.PantryService import PantryService
 import uuid
 from models.Pantry import Pantry, PantryIngredients
@@ -43,36 +45,12 @@ async def get_pantry(request: Request, db: AsyncSession = Depends(get_db)):
     user = request.state.user if hasattr(request.state, "user") else None
     if not user or "sub" not in user:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
     userid = int(user["sub"])
-    trace_id = str(uuid.uuid4())
+    result = await PantryService.get_pantry_by_userid(db, userid)
 
-    result = await db.execute(
-        select(Pantry)
-        .options(selectinload(Pantry.pantry_ingredients).selectinload(PantryIngredients.ingredient))
-        .where(Pantry.userid == userid)
-    )
-    pantry = result.scalars().first()
-    if not pantry:
-        return {
-            "trace_id": trace_id,
-            "message": "Pantry not found",
-            "data": {"ingredients": []}
-        }
+    return result
 
-    ingredients_list = []
-    for pi in pantry.pantry_ingredients:
-        ingredients_list.append({
-            "name": pi.ingredient.name if pi.ingredient else None,
-            "quantity": pi.quantity
-        })
-
-    return {
-        "trace_id": trace_id,
-        "message": "success",
-        "data": {
-            "ingredients": ingredients_list
-        }
-    }
 
 @router.post("/add-ingredient")
 async def add_ingredient(
@@ -85,7 +63,7 @@ async def add_ingredient(
         raise HTTPException(status_code=401, detail="Unauthorized")
     userid = int(user["sub"])
 
-    pantries = await PantryService.get_pantry_by_userid(db, userid)
+    pantries = await PantryRepository.get_pantry_by_userid(db, userid)
     if not pantries:
         raise HTTPException(status_code=404, detail="Pantry not found")
     pantryid = pantries[0].pantryid

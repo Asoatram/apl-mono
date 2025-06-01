@@ -1,7 +1,9 @@
+from dotenv import load_dotenv
 from fastapi import Request, HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 import os
+load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY", "secret")
 ALGORITHM = "HS256"
@@ -17,4 +19,3 @@ class JWTBearer(HTTPBearer):
             return payload  # or return payload["sub"]
         except JWTError as e:
             raise HTTPException(status_code=403, detail=f"Invalid or expired token: {str(e)}")
-
