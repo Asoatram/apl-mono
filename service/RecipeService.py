@@ -57,6 +57,7 @@ class RecipeService:
         ingredients_list = await PantryRepository.get_pantry_ingredients_by_userid(db, user_id)
         for ingredient in ingredients_list.pantry_ingredients:
             available_ingredients_list.append(ingredient.ingredient.name)
+            print("ingredient", ingredient.ingredient.name)
         message = [
             {"role": "system", "content": """
             You are a highly trained culinary expert with professional kitchen experience. Your role is to help a home cook solve specific cooking problems with clear, precise, and technically accurate advice. Keep it short and simple. Speak with authority, avoid casual language or personal stories, and focus only on practical, reliable solutions suitable for a home kitchen. Do not use emojis or unnecessary flourishes.
